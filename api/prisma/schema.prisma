@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  passwordHash   String
+  role           Role      @default(USER)
+  city           String?
+  phone          String?
+  shopName       String?
+  shopDescription String?
+  shopAddress    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  servicesOffered Service[] @relation("ProviderServices")
+  bookings        Booking[] @relation("CustomerBookings")
+  reviews         Review[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  city        String
+  price       Float
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  providerId  String
+  provider    User     @relation("ProviderServices", fields: [providerId], references: [id])
+
+  bookings    Booking[]
+  reviews     Review[]
+
+  @@index([city, category])
+  @@index([title])
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  scheduledAt  DateTime
+  notes        String?
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  serviceId    String
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  customerId   String
+  customer     User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+
+  review       Review?
+
+  @@index([customerId, status])
+  @@index([serviceId, status])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  bookingId  String   @unique
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+}
