@@ -12,7 +12,8 @@ async function main() {
     update: {
       shopName: "Ravi Home Services",
       shopDescription: "Trusted daily home services in Bengaluru.",
-      shopAddress: "BTM Layout, Bengaluru"
+      shopAddress: "BTM Layout, Bengaluru",
+      workType: "Cleaning, Electrical, Plumbing"
     },
     create: {
       name: "Ravi Kumar",
@@ -23,7 +24,8 @@ async function main() {
       phone: "+91-9000000001",
       shopName: "Ravi Home Services",
       shopDescription: "Trusted daily home services in Bengaluru.",
-      shopAddress: "BTM Layout, Bengaluru"
+      shopAddress: "BTM Layout, Bengaluru",
+      workType: "Cleaning, Electrical, Plumbing"
     }
   });
 
@@ -45,8 +47,12 @@ async function main() {
       title: "Home Deep Cleaning",
       description: "Professional full-home cleaning with eco-safe products.",
       category: "Cleaning",
+      workType: "Cleaner",
       city: "Bengaluru",
       price: 1499,
+      minorPrice: 499,
+      smallPrice: 1499,
+      majorPrice: 2999,
       imageUrl:
         "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=900&q=80"
     },
@@ -54,8 +60,12 @@ async function main() {
       title: "Electrician Visit",
       description: "Fan, switchboard, lighting and wiring fixes for home.",
       category: "Electrical",
+      workType: "Electrician",
       city: "Bengaluru",
       price: 499,
+      minorPrice: 299,
+      smallPrice: 799,
+      majorPrice: 1999,
       imageUrl:
         "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=900&q=80"
     }

@@ -9,8 +9,12 @@ const createServiceSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
   category: z.string().min(2),
+  workType: z.string().min(2).optional(),
   city: z.string().min(2),
-  price: z.number().positive(),
+  price: z.number().positive().optional(),
+  minorPrice: z.number().positive(),
+  smallPrice: z.number().positive(),
+  majorPrice: z.number().positive(),
   imageUrl: z.url().optional()
 });
 
@@ -39,8 +43,10 @@ router.get("/", async (req, res, next) => {
       { title: { contains: token, mode: "insensitive" } },
       { description: { contains: token, mode: "insensitive" } },
       { category: { contains: token, mode: "insensitive" } },
+      { workType: { contains: token, mode: "insensitive" } },
       { provider: { is: { name: { contains: token, mode: "insensitive" } } } },
-      { provider: { is: { shopName: { contains: token, mode: "insensitive" } } } }
+      { provider: { is: { shopName: { contains: token, mode: "insensitive" } } } },
+      { provider: { is: { workType: { contains: token, mode: "insensitive" } } } }
     ]);
 
     const services = await prisma.service.findMany({
@@ -63,7 +69,8 @@ router.get("/", async (req, res, next) => {
             phone: true,
             shopName: true,
             shopDescription: true,
-            shopAddress: true
+            shopAddress: true,
+            workType: true
           }
         },
         reviews: {
@@ -146,7 +153,8 @@ router.get("/:id", async (req, res, next) => {
             phone: true,
             shopName: true,
             shopDescription: true,
-            shopAddress: true
+            shopAddress: true,
+            workType: true
           }
         },
         reviews: {
@@ -175,6 +183,7 @@ router.post("/", authRequired, requireRole("PROVIDER", "ADMIN"), async (req, res
     const service = await prisma.service.create({
       data: {
         ...data,
+        price: data.smallPrice,
         providerId: req.user.id
       }
     });

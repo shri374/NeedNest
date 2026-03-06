@@ -22,5 +22,11 @@ export function errorHandler(err, _req, res, _next) {
   }
 
   console.error(err);
+  if (process.env.NODE_ENV !== "production") {
+    return res.status(500).json({
+      message: err?.message || "Internal server error",
+      code: err?.code || "UNKNOWN_ERROR"
+    });
+  }
   return res.status(500).json({ message: "Internal server error" });
 }

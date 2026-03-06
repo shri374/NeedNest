@@ -11,6 +11,7 @@ const shopSchema = z.object({
   shopName: z.string().min(2),
   shopDescription: z.string().min(10).optional(),
   shopAddress: z.string().min(5).optional(),
+  workType: z.string().min(2).optional(),
   city: z.string().min(2).optional(),
   phone: z.string().min(8).optional()
 });
@@ -26,7 +27,8 @@ router.get("/me/shop", async (req, res, next) => {
         phone: true,
         shopName: true,
         shopDescription: true,
-        shopAddress: true
+        shopAddress: true,
+        workType: true
       }
     });
 
@@ -54,7 +56,8 @@ router.put("/me/shop", async (req, res, next) => {
         phone: true,
         shopName: true,
         shopDescription: true,
-        shopAddress: true
+        shopAddress: true,
+        workType: true
       }
     });
 

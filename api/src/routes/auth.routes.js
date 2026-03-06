@@ -56,7 +56,8 @@ router.post("/register", async (req, res, next) => {
         phone: user.phone,
         shopName: user.shopName,
         shopDescription: user.shopDescription,
-        shopAddress: user.shopAddress
+        shopAddress: user.shopAddress,
+        workType: user.workType
       }
     });
   } catch (error) {
@@ -91,7 +92,8 @@ router.post("/login", async (req, res, next) => {
         phone: user.phone,
         shopName: user.shopName,
         shopDescription: user.shopDescription,
-        shopAddress: user.shopAddress
+        shopAddress: user.shopAddress,
+        workType: user.workType
       }
     });
   } catch (error) {
@@ -113,6 +115,7 @@ router.get("/me", authRequired, async (req, res, next) => {
         shopName: true,
         shopDescription: true,
         shopAddress: true,
+        workType: true,
         createdAt: true
       }
     });
