@@ -1,12 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AuthPage() {
   const { login, register } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const roleFromQuery = searchParams.get("role") === "PROVIDER" ? "PROVIDER" : "USER";
+  const modeFromQuery = searchParams.get("mode") === "register";
 
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(modeFromQuery);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -15,8 +20,25 @@ export default function AuthPage() {
     password: "",
     city: "",
     phone: "",
-    role: "USER"
+    role: roleFromQuery
   });
+
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, role: roleFromQuery }));
+  }, [roleFromQuery]);
+
+  useEffect(() => {
+    setIsRegister(modeFromQuery);
+  }, [modeFromQuery]);
+
+  function toggleAuthMode() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("mode", isRegister ? "login" : "register");
+      if (!next.get("role")) next.set("role", roleFromQuery);
+      return next;
+    });
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -35,9 +57,9 @@ export default function AuthPage() {
         loggedInUser = await login({ email: form.email, password: form.password });
       }
       if (loggedInUser?.role === "PROVIDER") {
-        navigate("/provider");
+        navigate("/provider-dashboard");
       } else {
-        navigate("/");
+        navigate("/user-dashboard");
       }
     } catch (err) {
       setError(err.message);
@@ -48,12 +70,12 @@ export default function AuthPage() {
 
   return (
     <div className="container">
-      <h2>{isRegister ? "Create account" : "Login"}</h2>
+      <h2>{isRegister ? t("createAccount") : t("login")}</h2>
       <form className="card form-grid" onSubmit={onSubmit}>
         {isRegister && (
           <>
             <input
-              placeholder="Full name"
+              placeholder={t("fullName")}
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               required
@@ -62,16 +84,16 @@ export default function AuthPage() {
               value={form.role}
               onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
             >
-              <option value="USER">User</option>
-              <option value="PROVIDER">Provider</option>
+              <option value="USER">{t("user")}</option>
+              <option value="PROVIDER">{t("providerRole")}</option>
             </select>
             <input
-              placeholder="City"
+              placeholder={t("city")}
               value={form.city}
               onChange={(e) => setForm((prev) => ({ ...prev, city: e.target.value }))}
             />
             <input
-              placeholder="Phone"
+              placeholder={t("phone")}
               value={form.phone}
               onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             />
@@ -80,28 +102,28 @@ export default function AuthPage() {
 
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t("email")}
           value={form.email}
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
           required
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={t("password")}
           value={form.password}
           onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
           required
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Please wait..." : isRegister ? "Register" : "Login"}
+          {loading ? t("pleaseWait") : isRegister ? t("createAccount") : t("login")}
         </button>
 
         {error && <p className="error">{error}</p>}
       </form>
 
-      <button className="link-btn" onClick={() => setIsRegister((prev) => !prev)}>
-        {isRegister ? "Already have account? Login" : "New here? Register"}
+      <button className="link-btn" onClick={toggleAuthMode}>
+        {isRegister ? t("alreadyHaveAccount") : t("newHereRegister")}
       </button>
     </div>
   );

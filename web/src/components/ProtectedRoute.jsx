@@ -1,11 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
 
   if (loading) {
-    return <p className="container">Checking session...</p>;
+    return <p className="container">{t("checkingSession")}</p>;
   }
 
   if (!user) {

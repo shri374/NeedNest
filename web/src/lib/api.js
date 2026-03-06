@@ -1,11 +1,25 @@
-const API_BASE = "";
+const RAW_API_BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "").trim();
+const API_BASE = RAW_API_BASE.replace(/\/+$/, "");
+
+function buildUrl(path) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (!API_BASE) return normalizedPath;
+
+  // Avoid accidental `/api/api/...` when API_BASE already ends with `/api`.
+  if (API_BASE.endsWith("/api") && normalizedPath.startsWith("/api/")) {
+    return `${API_BASE}${normalizedPath.slice(4)}`;
+  }
+
+  return `${API_BASE}${normalizedPath}`;
+}
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("neednest_token");
+  const url = buildUrl(path);
 
   let res;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
+    res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -14,14 +28,17 @@ async function request(path, options = {}) {
       }
     });
   } catch {
-    throw new Error("Cannot reach API. Run `npm run dev` from project root.");
+    throw new Error(
+      `Cannot reach API at ${url}. Start API server or set VITE_API_URL (example: https://your-api-domain.com).`
+    );
   }
 
   const contentType = res.headers.get("content-type") || "";
-  const data = contentType.includes("application/json") ? await res.json() : null;
+  const data = contentType.includes("application/json") ? await res.json().catch(() => null) : null;
+  const text = data ? "" : await res.text().catch(() => "");
 
   if (!res.ok) {
-    const message = data?.message || "Request failed";
+    const message = data?.message || text || `Request failed (${res.status})`;
     throw new Error(message);
   }
 
@@ -53,6 +70,16 @@ export const api = {
   createBooking: (payload) => request("/api/bookings", { method: "POST", body: JSON.stringify(payload) }),
   myBookings: () => request("/api/bookings/my"),
   providerBookings: () => request("/api/bookings/provider"),
+  sendQuote: (bookingId, payload) =>
+    request(`/api/bookings/${bookingId}/quote`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    }),
+  respondQuote: (bookingId, accepted) =>
+    request(`/api/bookings/${bookingId}/quote-response`, {
+      method: "PATCH",
+      body: JSON.stringify({ accepted })
+    }),
   updateBookingStatus: (bookingId, status) =>
     request(`/api/bookings/${bookingId}/status`, {
       method: "PATCH",
